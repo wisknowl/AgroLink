@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, ScrollView, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import TabHeader from '@/components/TabHeader';
 import YieldCard from '@/components/YieldCard';
@@ -31,6 +31,12 @@ export default function HomeScreen() {
     ? posts.filter(post => favoritePosts.includes(post.id))
     : posts;
 
+  // Calculate available height for the card
+  const windowHeight = Dimensions.get('window').height;
+  const headerHeight = 56; // Approximate TabHeader height (adjust as needed)
+  const tabBarHeight = 64; // Approximate bottom tab bar height (adjust as needed)
+  const cardHeight = windowHeight - headerHeight - tabBarHeight;
+
   return (
     <View style={styles.container}>
       <TabHeader 
@@ -54,10 +60,17 @@ export default function HomeScreen() {
       {activeTab === 'AgroFeed' && (
         <FlatList
           data={filteredPosts}
-          renderItem={renderPostItem}
+          renderItem={({ item }) => (
+            <View style={{ height: cardHeight }}>
+              <PostCard post={item} fullScreen />
+            </View>
+          )}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
+          pagingEnabled
+          snapToInterval={cardHeight}
+          decelerationRate="fast"
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ padding: 0 }}
         />
       )}
 
@@ -96,7 +109,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   listContent: {
-    padding: 16,
+    padding: 0,
   },
   columnWrapper: {
     justifyContent: 'space-between',

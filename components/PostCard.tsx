@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
-import { Heart, MessageCircle, Share2, User } from 'lucide-react-native';
+import { Heart, MessageCircle, Share2 } from 'lucide-react-native';
 import { Post } from '@/types';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import Colors from '@/constants/colors';
@@ -32,40 +32,35 @@ export default function PostCard({ post, fullScreen = false }: PostCardProps) {
 
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen]}>
-      <View style={styles.header}>
-        <Image source={{ uri: post.farmerAvatar }} style={styles.avatar} />
-        <View style={styles.headerText}>
-          <Text style={styles.farmerName}>{post.farmerName}</Text>
-          <Text style={styles.timestamp}>
-            {new Date(post.createdAt).toLocaleDateString()}
-          </Text>
-        </View>
-      </View>
-      
       <Image source={{ uri: post.media }} style={[styles.media, fullScreen && styles.fullScreenMedia]} />
-      
-      <View style={styles.content}>
-        <Text style={styles.caption}>{post.content}</Text>
-      </View>
-      
-      <View style={styles.actions}>
+
+      {/* Floating actions and avatar */}
+      <View style={styles.floatingActionsContainer}>
+        <Image source={{ uri: post.farmerAvatar }} style={styles.avatar} />
         <Pressable style={styles.actionButton} onPress={toggleLike}>
           <Heart 
-            size={24} 
+            size={28} 
             color={isFavorite ? Colors.error : Colors.text.secondary} 
             fill={isFavorite ? Colors.error : 'none'} 
           />
           <Text style={styles.actionText}>{post.likes}</Text>
         </Pressable>
-        
         <Pressable style={styles.actionButton} onPress={handleComment}>
-          <MessageCircle size={24} color={Colors.text.secondary} />
+          <MessageCircle size={28} color={Colors.text.secondary} />
           <Text style={styles.actionText}>{post.comments}</Text>
         </Pressable>
-        
         <Pressable style={styles.actionButton} onPress={handleShare}>
-          <Share2 size={24} color={Colors.text.secondary} />
+          <Share2 size={28} color={Colors.text.secondary} />
         </Pressable>
+      </View>
+
+      {/* Floating description */}
+      <View style={styles.floatingDescription}>
+        <Text style={styles.farmerName}>{post.farmerName}</Text>
+        <Text style={styles.caption}>{post.content}</Text>
+        <Text style={styles.timestamp}>
+          {new Date(post.createdAt).toLocaleDateString()}
+        </Text>
       </View>
     </View>
   );
@@ -73,6 +68,7 @@ export default function PostCard({ post, fullScreen = false }: PostCardProps) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: Colors.card,
     borderRadius: 12,
     overflow: 'hidden',
@@ -84,63 +80,77 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   fullScreen: {
-    flex: 1,
     borderRadius: 0,
     marginBottom: 0,
   },
-  header: {
-    flexDirection: 'row',
+  media: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  fullScreenMedia: {
+    height: '100%',
+  },
+   floatingActionsContainer: {
+    position: 'absolute',
+    right: 16,
+    bottom: 32, // changed from top: '30%' to bottom: 32
     alignItems: 'center',
-    padding: 12,
+    zIndex: 2,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
-  headerText: {
-    flex: 1,
+  actionButton: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  actionText: {
+    marginTop: 4,
+    fontSize: 14,
+    color: '#fff',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    fontWeight: 'bold',
+  },
+  floatingDescription: {
+    position: 'absolute',
+    left: 16,
+    bottom: 32,
+    zIndex: 2,
+    maxWidth: '70%',
   },
   farmerName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text.primary,
+    fontWeight: '700',
+    color: '#fff',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 4,
+  },
+  caption: {
+    fontSize: 15,
+    color: '#fff',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    marginBottom: 8,
   },
   timestamp: {
     fontSize: 12,
-    color: Colors.text.secondary,
-  },
-  media: {
-    width: '100%',
-    height: 300,
-    resizeMode: 'cover',
-  },
-  fullScreenMedia: {
-    height: 400,
-  },
-  content: {
-    padding: 12,
-  },
-  caption: {
-    fontSize: 14,
-    color: Colors.text.primary,
-    lineHeight: 20,
-  },
-  actions: {
-    flexDirection: 'row',
-    padding: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 24,
-  },
-  actionText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: Colors.text.secondary,
+    color: '#eee',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 });

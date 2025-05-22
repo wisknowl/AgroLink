@@ -30,10 +30,14 @@ export default function TabHeader({ tabs, activeTab, onTabChange }: TabHeaderPro
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.background,
+    // backgroundColor: Colors.background,
+    paddingTop: 20,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingBottom: 16,
+    // padding:16,
+    // paddingBottom: 0,
+    // borderBottomWidth: 1,
+    // borderBottomColor: Colors.border,
   },
   tab: {
     paddingVertical: 16,

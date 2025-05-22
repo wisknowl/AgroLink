@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Home, Inbox, ShoppingBag, ShoppingCart, User } from "lucide-react-native";
+import { Leaf, Sprout, Wheat, Trees } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import { useCartStore } from "@/store/cartStore";
 import { View, Text, StyleSheet } from "react-native";
@@ -44,6 +45,7 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ color }) => <Home size={24} color={color} />,
           headerTitle: "AgroLink Cameroon",
+          headerShown: false
         }}
       />
       <Tabs.Screen
@@ -58,7 +60,7 @@ export default function TabLayout() {
         name="agro-yields"
         options={{
           title: "AgroYields",
-          tabBarIcon: ({ color }) => <ShoppingBag size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Sprout size={24} color={color} />,
           headerTitle: "AgroYields Marketplace",
         }}
       />
