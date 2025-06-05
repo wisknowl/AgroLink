@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  initialRouteName: "auth/login",
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -53,43 +53,36 @@ function RootLayoutNav() {
           headerShadowVisible: false,
         }}
       >
+        <Stack.Screen name="auth/login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen 
-          name="yield/[id]" 
-          options={{ 
+        <Stack.Screen
+          name="yield/[id]"
+          options={{
             title: "Product Details",
             presentation: "card",
-          }} 
+          }}
         />
-        <Stack.Screen 
-          name="farmer/[id]" 
-          options={{ 
+        <Stack.Screen
+          name="farmer/[id]"
+          options={{
             title: "Farmer Profile",
             presentation: "card",
-          }} 
+          }}
         />
-        <Stack.Screen 
-          name="chat/[id]" 
-          options={{ 
+        <Stack.Screen
+          name="chat/[id]"
+          options={{
             title: "Chat",
             presentation: "card",
-          }} 
+          }}
         />
-        <Stack.Screen 
-          name="auth/login" 
-          options={{ 
-            title: "Login",
-            presentation: "modal",
-            headerShown: false,
-          }} 
-        />
-        <Stack.Screen 
-          name="auth/register" 
-          options={{ 
+        <Stack.Screen
+          name="auth/register"
+          options={{
             title: "Register",
             presentation: "modal",
             headerShown: false,
-          }} 
+          }}
         />
       </Stack>
     </>
