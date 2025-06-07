@@ -8,21 +8,33 @@ import { useFavoritesStore } from '@/store/favoritesStore';
 import Colors from '@/constants/colors';
 import { Post } from '@/types';
 import { farmers } from '@/mocks/data';
+import Popover, { PopoverPlacement } from 'react-native-popover-view';
 
 
 interface YieldCardProps {
   item: AgroYield;
-  popupVisible: boolean;
-  onOpenPopup: () => void;
-  onClosePopup: () => void;
+  popoverVisible: boolean;
+  onOpenPopover: () => void;
+  onClosePopover: () => void;
 }
 
-export default function YieldCard({ item, popupVisible, onOpenPopup, onClosePopup }: YieldCardProps) {
+export default function YieldCard({ item, popoverVisible, onOpenPopover, onClosePopover }: YieldCardProps) {
   const router = useRouter();
   const { addToCart } = useCartStore();
   const { addYield, removeYield, isYieldFavorite } = useFavoritesStore();
   const isFavorite = isYieldFavorite(item.id);
-  const [localModalVisible, setLocalModalVisible] = useState(false);
+
+  const moreButtonRef = React.useRef<View>(null);
+  const cardRef = React.useRef<View>(null);
+  const [displayArea, setDisplayArea] = React.useState<{ x: number; y: number; width: number; height: number } | undefined>();
+
+  React.useEffect(() => {
+    if (popoverVisible && cardRef.current) {
+      cardRef.current.measureInWindow((x, y, width, height) => {
+        setDisplayArea({ x, y, width, height });
+      });
+    }
+  }, [popoverVisible]);
 
   const handlePress = () => {
     router.push(`/yield/${item.id}`);
@@ -39,11 +51,17 @@ export default function YieldCard({ item, popupVisible, onOpenPopup, onClosePopu
       addYield(item.id);
     }
   };
+  const handleChatWithFarmer = () => {
+  if (farmer?.id) {
+    onClosePopover();
+    router.push(`/chat/${farmer.id}`);
+  }
+};
 
   const farmer = farmers.find(f => f.id === item.farmerId);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} ref={cardRef}>
       <Pressable onPress={handlePress}>
         <Image source={{ uri: item.image }} style={styles.image} />
       </Pressable>
@@ -67,29 +85,40 @@ export default function YieldCard({ item, popupVisible, onOpenPopup, onClosePopu
           <Pressable style={styles.cartButton} onPress={handleAddToCart}>
             <ShoppingCart size={13} color={Colors.text.light} />
           </Pressable>
-          <Pressable style={styles.moreButton} onPress={onOpenPopup}>
-            <MoreVertical size={18} color={Colors.text.secondary} />
-          </Pressable>
+          <Popover
+            isVisible={popoverVisible}
+            from={(
+              <Pressable ref={moreButtonRef} style={styles.moreButton} onPress={onOpenPopover}>
+                <MoreVertical size={18} color={Colors.text.secondary} />
+              </Pressable>
+            )}
+            onRequestClose={onClosePopover}
+            placement={PopoverPlacement.TOP}
+            displayArea={displayArea}
+            backgroundStyle={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
+            arrowSize={{ width: 16, height: 8 }}
+          >
+            <View style={styles.modalContent}>
+              <Pressable style={styles.modalRow} onPress={toggleFavorite}>
+                <Heart
+                  size={22}
+                  color={isFavorite ? Colors.error : Colors.text.secondary}
+                  fill={isFavorite ? Colors.error : 'none'}
+                />
+                <Text style={styles.modalText}>{isFavorite ? 'Remove from wish list' : 'Add to wish list'}</Text>
+              </Pressable>
+              <Pressable style={styles.modalRow} onPress={() => {/* handle don't like */}}>
+                <HeartOff size={22} color={Colors.error} />
+                <Text style={styles.modalText}>Don't like this product</Text>
+              </Pressable>
+              <Pressable style={styles.modalRow} onPress={handleChatWithFarmer}>
+                <Image source={{ uri: farmer?.profilePhoto }} style={styles.farmerAvatar} />
+                <Text style={styles.modalText}>Chat with Farmer</Text>
+              </Pressable>
+            </View>
+          </Popover>
         </View>
       </View>
-      {popupVisible && (
-        <Pressable style={styles.fullScreenOverlay} onPress={onClosePopup}>
-          <View style={styles.modalContent}>
-            <Pressable style={styles.modalRow} onPress={() => {/* handle add to wish list */}}>
-              <Heart size={22} color={Colors.primary} />
-              <Text style={styles.modalText}>Add to wish list</Text>
-            </Pressable>
-            <Pressable style={styles.modalRow} onPress={() => {/* handle don't like */}}>
-              <HeartOff size={22} color={Colors.error} />
-              <Text style={styles.modalText}>Don't like this product</Text>
-            </Pressable>
-            <Pressable style={styles.modalRow} onPress={() => {/* handle chat with farmer */}}>
-              <Image source={{ uri: farmer?.profilePhoto }} style={styles.farmerAvatar} />
-              <Text style={styles.modalText}>Chat with Farmer</Text>
-            </Pressable>
-          </View>
-        </Pressable>
-      )}
     </View>
   );
 }
@@ -172,7 +201,7 @@ const styles = StyleSheet.create({
     marginRight: 8,  // Space between cart and more button
   },
   moreButton: {
-    padding: 0,
+    padding: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -192,11 +221,12 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   modalContent: {
+    flexDirection: 'column',
+    justifyContent: 'center',
     backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 24,
+    padding: 8,
     minWidth: 220,
-    alignItems: 'flex-start',
+    alignItems: 'center',
     elevation: 5,
   },
   modalRow: {
@@ -206,15 +236,16 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modalText: {
-    fontSize: 16,
+    fontSize: 13,
     color: Colors.text.primary,
-    marginLeft: 16,
+    marginLeft: 10,
     fontWeight: '500',
+    width:'auto',
   },
   farmerAvatar: {
-    width: 28,
-    height: 28,
+    width: 22,
+    height: 22,
     borderRadius: 14,
-    marginRight: 4,
+    marginRight: 0,
   },
 });

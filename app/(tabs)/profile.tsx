@@ -20,6 +20,9 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     logout();
   };
+  const handleBecomeFarmer = () => {
+    router.push('/become-farmer');
+  };
 
   if (!isAuthenticated) {
     return (
@@ -58,7 +61,7 @@ export default function ProfileScreen() {
         <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
         
         {!user?.isFarmer && (
-          <Pressable style={styles.becomeButton}>
+          <Pressable style={styles.becomeButton} onPress={handleBecomeFarmer}>
             <Text style={styles.becomeButtonText}>Become a Farmer</Text>
           </Pressable>
         )}

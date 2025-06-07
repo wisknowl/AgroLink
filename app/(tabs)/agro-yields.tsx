@@ -8,7 +8,7 @@ import Colors from '@/constants/colors';
 export default function AgroYieldsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredYields, setFilteredYields] = useState(agroYields);
-  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -26,9 +26,9 @@ export default function AgroYieldsScreen() {
   const renderYieldItem = ({ item }) => (
     <YieldCard
       item={item}
-      popupVisible={openPopupId === item.id}
-      onOpenPopup={() => setOpenPopupId(item.id)}
-      onClosePopup={() => setOpenPopupId(null)}
+      popoverVisible={openPopoverId === item.id}
+      onOpenPopover={() => setOpenPopoverId(item.id)}
+      onClosePopover={() => setOpenPopoverId(null)}
     />
   );
 
@@ -58,8 +58,8 @@ export default function AgroYieldsScreen() {
           renderItem={renderYieldItem}
           keyExtractor={item => item.id}
           numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 8 }}
+          contentContainerStyle={{ paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
         />
       )}

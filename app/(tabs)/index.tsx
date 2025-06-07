@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 export default function HomeScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('AgroFeed');
-  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   useFocusEffect(
     React.useCallback(() => {
       setActiveTab('AgroFeed');
@@ -25,9 +25,9 @@ export default function HomeScreen() {
   const renderYieldItem = ({ item }) => (
     <YieldCard
       item={item}
-      popupVisible={openPopupId === item.id}
-      onOpenPopup={() => setOpenPopupId(item.id)}
-      onClosePopup={() => setOpenPopupId(null)}
+      popoverVisible={openPopoverId === item.id}
+      onOpenPopover={() => setOpenPopoverId(item.id)}
+      onClosePopover={() => setOpenPopoverId(null)}
     />
   );
 

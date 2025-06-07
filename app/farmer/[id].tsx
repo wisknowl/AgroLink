@@ -13,7 +13,7 @@ export default function FarmerProfileScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Products');
   const [isFollowing, setIsFollowing] = useState(false);
-  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   
   const farmer = farmers.find(f => f.id === id);
   const farmerYields = agroYields.filter(item => item.farmerId === id);
@@ -44,9 +44,9 @@ export default function FarmerProfileScreen() {
   const renderYieldItem = ({ item }) => (
     <YieldCard
       item={item}
-      popupVisible={openPopupId === item.id}
-      onOpenPopup={() => setOpenPopupId(item.id)}
-      onClosePopup={() => setOpenPopupId(null)}
+      popoverVisible={openPopoverId === item.id}
+      onOpenPopover={() => setOpenPopoverId(item.id)}
+      onClosePopover={() => setOpenPopoverId(null)}
     />
   );
 
@@ -105,8 +105,9 @@ export default function FarmerProfileScreen() {
                 renderItem={renderYieldItem}
                 keyExtractor={item => item.id}
                 numColumns={2}
-                columnWrapperStyle={styles.columnWrapper}
-                scrollEnabled={false}
+                columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 8 }}
+                contentContainerStyle={{ paddingBottom: 16 }}
+                showsVerticalScrollIndicator={false}
               />
             )}
           </View>
@@ -226,9 +227,6 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     padding: 16,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
   },
   emptyText: {
     fontSize: 16,
