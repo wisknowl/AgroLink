@@ -8,6 +8,7 @@ import Colors from '@/constants/colors';
 export default function AgroYieldsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredYields, setFilteredYields] = useState(agroYields);
+  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -23,7 +24,12 @@ export default function AgroYieldsScreen() {
   };
 
   const renderYieldItem = ({ item }) => (
-    <YieldCard item={item} />
+    <YieldCard
+      item={item}
+      popupVisible={openPopupId === item.id}
+      onOpenPopup={() => setOpenPopupId(item.id)}
+      onClosePopup={() => setOpenPopupId(null)}
+    />
   );
 
   return (
@@ -87,11 +93,11 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   listContent: {
-    padding: 16,
+    padding: 2,
     paddingTop: 0,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
   },
   emptyContainer: {
     flex: 1,

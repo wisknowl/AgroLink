@@ -24,6 +24,8 @@ export interface AgroYield {
   title: string;
   description: string;
   price: number;
+  oldPrice?: number;
+  rating?: number;
   unit: string;
   image: string;
   category: string;

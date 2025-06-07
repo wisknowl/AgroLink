@@ -7,16 +7,28 @@ import PostCard from '@/components/PostCard';
 import { agroYields, posts } from '@/mocks/data';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import Colors from '@/constants/colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('AgroYields');
+  const [activeTab, setActiveTab] = useState('AgroFeed');
+  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+  useFocusEffect(
+    React.useCallback(() => {
+      setActiveTab('AgroFeed');
+    }, [])
+  );
   const { yields: favoriteYields, posts: favoritePosts } = useFavoritesStore();
   
   const tabs = ['AgroFeed', 'AgroYields', 'Favorites'];
 
   const renderYieldItem = ({ item }) => (
-    <YieldCard item={item} />
+    <YieldCard
+      item={item}
+      popupVisible={openPopupId === item.id}
+      onOpenPopup={() => setOpenPopupId(item.id)}
+      onClosePopup={() => setOpenPopupId(null)}
+    />
   );
 
   const renderPostItem = ({ item }) => (
@@ -77,16 +89,13 @@ export default function HomeScreen() {
       {activeTab === 'Favorites' && (
         <ScrollView contentContainerStyle={styles.listContent}>
           {filteredPosts.length > 0 && (
-            <>
-              <FlatList
-                data={filteredPosts}
-                renderItem={renderPostItem}
-                keyExtractor={item => item.id}
-                scrollEnabled={false}
-              />
-            </>
+            <FlatList
+              data={filteredPosts}
+              renderItem={renderPostItem}
+              keyExtractor={item => item.id}
+              scrollEnabled={false}
+            />
           )}
-          
           {filteredYields.length > 0 && (
             <FlatList
               data={filteredYields}
@@ -112,6 +121,6 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
   },
 });

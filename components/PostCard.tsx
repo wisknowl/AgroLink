@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Share2 } from 'lucide-react-native';
 import { Post } from '@/types';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import Colors from '@/constants/colors';
+import { useRouter } from 'expo-router';
 
 interface PostCardProps {
   post: Post;
@@ -13,6 +14,7 @@ interface PostCardProps {
 export default function PostCard({ post, fullScreen = false }: PostCardProps) {
   const { addPost, removePost, isPostFavorite } = useFavoritesStore();
   const isFavorite = isPostFavorite(post.id);
+  const router = useRouter();
 
   const toggleLike = () => {
     if (isFavorite) {
@@ -30,13 +32,19 @@ export default function PostCard({ post, fullScreen = false }: PostCardProps) {
     // Handle share action
   };
 
+  const goToFarmerProfile = () => {
+    router.push(`/farmer/${post.farmerId}`);
+  };
+
   return (
     <View style={[styles.container, fullScreen && styles.fullScreen]}>
       <Image source={{ uri: post.media }} style={[styles.media, fullScreen && styles.fullScreenMedia]} />
 
       {/* Floating actions and avatar */}
       <View style={styles.floatingActionsContainer}>
-        <Image source={{ uri: post.farmerAvatar }} style={styles.avatar} />
+        <Pressable onPress={goToFarmerProfile}>
+          <Image source={{ uri: post.farmerAvatar }} style={styles.avatar} />
+        </Pressable>
         <Pressable style={styles.actionButton} onPress={toggleLike}>
           <Heart 
             size={28} 

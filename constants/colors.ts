@@ -4,6 +4,7 @@ export default {
   secondary: '#FFA000', // Warm amber
   accent: '#8BC34A', // Light green
   background: '#FFFFFF',
+  headerFooterColor: '#6D4C41',
   card: '#F9F9F9',
   text: {
     primary: '#212121',
