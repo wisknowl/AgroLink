@@ -7,6 +7,7 @@ import YieldCard from '@/components/YieldCard';
 import PostCard from '@/components/PostCard';
 import TabHeader from '@/components/TabHeader';
 import Colors from '@/constants/colors';
+import Basket from '@/components/basket';
 
 export default function FarmerProfileScreen() {
   const { id } = useLocalSearchParams();
@@ -135,6 +136,8 @@ export default function FarmerProfileScreen() {
           </View>
         )}
       </ScrollView>
+      
+      <Basket />
     </View>
   );
 }

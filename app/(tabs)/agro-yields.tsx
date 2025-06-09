@@ -4,6 +4,7 @@ import { Search, Filter } from 'lucide-react-native';
 import YieldCard from '@/components/YieldCard';
 import { agroYields } from '@/mocks/data';
 import Colors from '@/constants/colors';
+import Basket from '@/components/basket';
 
 export default function AgroYieldsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,6 +64,7 @@ export default function AgroYieldsScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+      <Basket />
     </View>
   );
 }

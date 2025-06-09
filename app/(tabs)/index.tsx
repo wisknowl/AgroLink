@@ -8,6 +8,7 @@ import { agroYields, posts } from '@/mocks/data';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import Colors from '@/constants/colors';
 import { useFocusEffect } from '@react-navigation/native';
+import Basket from '@/components/basket';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -108,6 +109,7 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       )}
+      <Basket />
     </View>
   );
 }
