@@ -194,11 +194,12 @@ const styles = StyleSheet.create({
   },
   cartButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 6, // Reduced
-    padding: 6,      // Reduced
+    borderRadius: 6, 
+    padding: 6,      
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8,  // Space between cart and more button
+    marginRight: 8,  
+    width: 45, 
   },
   moreButton: {
     padding: 2,

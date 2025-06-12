@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Animated, Pressable, Image, Easing, Dimensions } from 'react-native';
 import { useCartStore } from '@/store/cartStore';
+import { useBasketStore } from '@/store/basketStore';
 import Colors from '@/constants/colors';
 import { ShoppingBag, ChevronDown, Plus, Minus, Trash2 } from 'lucide-react-native';
+import Svg, { Path, Line } from 'react-native-svg';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const FREE_DELIVERY_COUNT = 10;
@@ -25,18 +27,38 @@ export default function Basket({ onGoToCart, lastAddedItem }: BasketProps) {
   const [showFlyImage, setShowFlyImage] = useState(false);
   const flyAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const [flyImageUri, setFlyImageUri] = useState<string | null>(null);
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   const totalItems = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
   const totalAmount = getTotal();
   const progress = Math.min(totalItems / FREE_DELIVERY_COUNT, 1);
 
-  // Badge pulse when items are added
+  // Shared shake animation function
+  const triggerShake = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 1, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -1, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 1, duration: 50, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+    ]).start();
+  };
+
+  // Badge pulse and shake when items are added
   useEffect(() => {
     Animated.sequence([
       Animated.timing(badgeScale, { toValue: 1.3, duration: 120, useNativeDriver: true }),
       Animated.timing(badgeScale, { toValue: 1, duration: 120, useNativeDriver: true })
     ]).start();
+    triggerShake();
   }, [totalItems]);
+
+  // Shake every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      triggerShake();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Animate progress bar
   useEffect(() => {
@@ -60,18 +82,19 @@ export default function Basket({ onGoToCart, lastAddedItem }: BasketProps) {
 
   // Add-to-basket fly animation (demo: triggers if lastAddedItem prop changes)
   useEffect(() => {
-    if (lastAddedItem && !expanded) {
-      setFlyImageUri(lastAddedItem.yield.image);
-      setShowFlyImage(true);
-      flyAnim.setValue({ x: 0, y: 0 });
-      Animated.timing(flyAnim, {
-        toValue: { x: SCREEN_WIDTH - 80, y: -60 },
-        duration: 600,
-        useNativeDriver: true,
-        easing: Easing.inOut(Easing.quad),
-      }).start(() => setShowFlyImage(false));
-    }
-  }, [lastAddedItem]);
+  console.log('lastAddedItem:', lastAddedItem);
+  if (lastAddedItem && !expanded) {
+    setFlyImageUri(lastAddedItem.yield.image);
+    setShowFlyImage(true);
+    flyAnim.setValue({ x: 0, y: 0 });
+    Animated.timing(flyAnim, {
+      toValue: { x: SCREEN_WIDTH - 80, y: -60 },
+      duration: 600,
+      useNativeDriver: true,
+      easing: Easing.inOut(Easing.quad),
+    }).start(() => setShowFlyImage(false));
+  }
+}, [lastAddedItem]);
 
   const handleQuantity = (id: string, delta: number) => {
     const item = items.find(i => i.id === id);
@@ -116,8 +139,7 @@ export default function Basket({ onGoToCart, lastAddedItem }: BasketProps) {
     extrapolate: 'clamp',
   });
 
-  // Remove SwipableBasketItem and all swipe-to-delete logic
-  // Only keep the main Basket component with static delete icon in expanded view
+  
   const handleDelete = (id: string) => {
     setRemovingId(id);
     Animated.timing(staggerAnims[items.findIndex(i => i.id === id)], {
@@ -130,13 +152,20 @@ export default function Basket({ onGoToCart, lastAddedItem }: BasketProps) {
     });
   };
 
+  // Collapse basket on screen change/unmount
+  useEffect(() => {
+    return () => {
+      setExpanded(false);
+    };
+  }, []);
+
   if (items.length === 0) return null;
 
   return (
     <>
-      {/* Background Blur/Dim */}
+      {/* Background Blur/Dim - now Pressable to collapse basket */}
       {expanded && (
-        <View style={styles.blurOverlay} pointerEvents="auto" />
+        <Pressable style={styles.blurOverlay} pointerEvents="auto" onPress={handleCollapse} />
       )}
       {/* Add-to-basket fly image */}
       {showFlyImage && flyImageUri && (
@@ -154,146 +183,198 @@ export default function Basket({ onGoToCart, lastAddedItem }: BasketProps) {
           }}
         />
       )}
+      {/* Outer Animated.View for height only (JS driver) */}
       <Animated.View style={[styles.container, { height: containerHeight }]}> 
-        {/* Basket grid background */}
-        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-          {/* Vertical lines */}
-          {Array.from({ length: 12 }).map((_, i) => (
-            <View
-              key={`v-${i}`}
-              style={{
-                position: 'absolute',
-                left: `${(i / 11) * 100}%`,
-                top: 0,
-                bottom: 0,
-                width: 2,
-                backgroundColor: 'rgba(255,255,255,0.18)',
-              }}
-            />
-          ))}
-          {/* Horizontal lines */}
-          {Array.from({ length: 8 }).map((_, i) => (
-            <View
-              key={`h-${i}`}
-              style={{
-                position: 'absolute',
-                top: `${(i / 7) * 100}%`,
-                left: 0,
-                right: 0,
-                height: 2,
-                backgroundColor: 'rgba(255,255,255,0.18)',
-              }}
-            />
-          ))}
-        </View>
-        {/* Progress Bar - only show when expanded */}
-        {expanded && (
-          <View style={styles.progressBarContainer}>
-            <Animated.View style={[
-              styles.progressBar,
-              { width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), height: 18, zIndex: 1 }
-            ]} />
-            <Animated.Text
-              style={[
-                styles.progressText,
-                {
-                  color: progressAnim.interpolate({
-                    inputRange: [0, 0.5, 1],
-                    outputRange: [Colors.primary, Colors.primary, '#fff'],
-                  }),
+        {/* Basket Handle - black, semi-circle, full width, now animated */}
+        <Animated.View
+          style={[
+            styles.basketHandleContainer,
+            {
+              transform: [{
+                translateX: shakeAnim.interpolate({ inputRange: [-1, 1], outputRange: [-10, 10] })
+              }],
+            },
+          ]}
+          pointerEvents="none"
+        >
+          <View style={styles.basketHandle} />
+        </Animated.View>
+        {/* Inner Animated.View for shake only (native driver) */}
+        <Animated.View style={{ flex: 1, transform: [{
+          translateX: shakeAnim.interpolate({ inputRange: [-1, 1], outputRange: [-10, 10] })
+        }] }}>
+          {/* Basket grid background */}
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            {/* Main grid: straight lines */}
+            {/* Vertical lines */}
+            {Array.from({ length: 12 }).map((_, i) => (
+              <View
+                key={`v-${i}`}
+                style={{
                   position: 'absolute',
+                  left: `${(i / 11) * 100}%`,
+                  top: 0,
+                  bottom: 0,
+                  width: 2,
+                  backgroundColor: 'rgba(255,255,255,0.18)',
+                }}
+              />
+            ))}
+            {/* Horizontal lines */}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <View
+                key={`h-${i}`}
+                style={{
+                  position: 'absolute',
+                  top: `${(i / 7) * 100}%`,
                   left: 0,
                   right: 0,
-                  textAlign: 'center',
-                  zIndex: 2,
-                  fontWeight: 'bold',
-                  fontSize: 12,
-                },
-              ]}
-            >
-              {totalItems} / {FREE_DELIVERY_COUNT} for Free Delivery
-            </Animated.Text>
+                  height: 2,
+                  backgroundColor: 'rgba(255,255,255,0.18)',
+                }}
+              />
+            ))}
+
+            {/* Overlay grid: extra straight horizontal and vertical lines for woven effect */}
+            {/* Extra vertical lines (overlay) */}
+            {Array.from({ length: 8 }).map((_, i) => (
+              <View
+                key={`overlay-v-${i}`}
+                style={{
+                  position: 'absolute',
+                  left: `${(i / 7) * 100}%`,
+                  top: 0,
+                  bottom: 0,
+                  width: 1,
+                  backgroundColor: 'rgba(255,255,255,0.28)',
+                  zIndex: 999,
+                }}
+              />
+            ))}
+            {/* Extra horizontal lines (overlay) */}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <View
+                key={`overlay-h-${i}`}
+                style={{
+                  position: 'absolute',
+                  top: `${(i / 4) * 100}%`,
+                  left: 0,
+                  right: 0,
+                  height: 1,
+                  backgroundColor: 'rgba(255,255,255,0.28)',
+                  zIndex: 999,
+                }}
+              />
+            ))}
           </View>
-        )}
-        {/* Collapsed View */}
-        {!expanded && (
-          <Animated.View style={{ opacity: collapsedOpacity }}>
-            <View style={styles.row}>
-              <FlatList
-                horizontal
-                data={items}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.itemRow}>
-                    <Image source={{ uri: item.yield.image }} style={styles.itemImage} />
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>{item.quantity}</Text>
-                    </View>
-                  </View>
-                )}
-                showsHorizontalScrollIndicator={false}
-              />
-              <TouchableOpacity style={styles.viewBasket} onPress={handleExpand}>
-                <Text style={styles.viewBasketText}>View Basket</Text>
-                <Animated.View style={{ transform: [{ scale: badgeScale }] }}>
-                  <ShoppingBag size={24} color={Colors.primary} />
-                  <View style={styles.iconBadge}>
-                    <Text style={styles.iconBadgeText}>{totalItems}</Text>
-                  </View>
-                </Animated.View>
-              </TouchableOpacity>
+          {expanded && (
+            <View style={styles.progressBarContainer}>
+              <Animated.View style={[
+                styles.progressBar,
+                { width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), height: 18, zIndex: 1 }
+              ]} />
+              <Animated.Text
+                style={[
+                  styles.progressText,
+                  {
+                    color: progressAnim.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [Colors.primary, Colors.primary, '#fff'],
+                    }),
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    textAlign: 'center',
+                    zIndex: 2,
+                    fontWeight: 'bold',
+                    fontSize: 12,
+                  },
+                ]}
+              >
+                {totalItems} / {FREE_DELIVERY_COUNT} for Free Delivery
+              </Animated.Text>
             </View>
-          </Animated.View>
-        )}
-        {/* Expanded View */}
-        {expanded && (
-          <Animated.View style={{ flex: 1, opacity: expandedOpacity }}>
-            <View style={styles.expandedContent}>
-              <FlatList
-                data={items}
-                keyExtractor={item => item.id}
-                renderItem={({ item, index }) => (
-                  <Animated.View
-                    style={[
-                      styles.expandedItemRow,
-                      {
-                        transform: [{ scale: staggerAnims[index] || 1 }],
-                        opacity: staggerAnims[index] || 1,
-                      },
-                    ]}
-                  >
-                    <Image source={{ uri: item.yield.image }} style={styles.expandedItemImage} />
-                    <View style={styles.expandedItemInfo}>
-                      <Text style={styles.expandedItemTitle}>{item.yield.title}</Text>
-                      <Text style={styles.expandedItemDesc}>{item.yield.description}</Text>
+          )}
+          {!expanded && (
+            <Animated.View style={{ opacity: collapsedOpacity }}>
+              <View style={styles.row}>
+                <FlatList
+                  horizontal
+                  data={items}
+                  keyExtractor={item => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.itemRow}>
+                      <Image source={{ uri: item.yield.image }} style={styles.itemImage} />
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{item.quantity}</Text>
+                      </View>
                     </View>
-                    <View style={styles.quantityControls}>
-                      <Pressable onPress={() => handleQuantity(item.id, -1)}>
-                        <Minus size={20} color={Colors.primary} />
-                      </Pressable>
-                      <Text style={styles.quantityText}>{item.quantity}</Text>
-                      <Pressable onPress={() => handleQuantity(item.id, 1)}>
-                        <Plus size={20} color={Colors.primary} />
-                      </Pressable>
+                  )}
+                  showsHorizontalScrollIndicator={false}
+                />
+                <TouchableOpacity style={styles.viewBasket} onPress={handleExpand}>
+                  <Text style={styles.viewBasketText}>View Basket</Text>
+                  <Animated.View style={{ transform: [{ scale: badgeScale }] }}>
+                    <ShoppingBag size={24} color={Colors.primary} />
+                    <View style={styles.iconBadge}>
+                      <Text style={styles.iconBadgeText}>{totalItems}</Text>
                     </View>
-                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ marginLeft: 8 }}>
-                      <Trash2 size={24} color={Colors.error} />
-                    </TouchableOpacity>
                   </Animated.View>
-                )}
-              />
-              <View style={styles.bottomRow}>
-                <TouchableOpacity style={styles.goToCartButton} onPress={onGoToCart}>
-                  <Text style={styles.goToCartText}>Go to Cart</Text>
-                </TouchableOpacity>
-                <Text style={styles.totalAmount}>{totalAmount} FCFA</Text>
-                <TouchableOpacity onPress={handleCollapse}>
-                  <ChevronDown size={28} color={Colors.primary} />
                 </TouchableOpacity>
               </View>
-            </View>
-          </Animated.View>
-        )}
+            </Animated.View>
+          )}
+          {expanded && (
+            <Animated.View style={{ flex: 1, opacity: expandedOpacity }}>
+              <View style={styles.expandedContent}>
+                <FlatList
+                  data={items}
+                  keyExtractor={item => item.id}
+                  renderItem={({ item, index }) => (
+                    <Animated.View
+                      style={[
+                        styles.expandedItemRow,
+                        {
+                          transform: [{ scale: staggerAnims[index] || 1 }],
+                          opacity: staggerAnims[index] || 1,
+                        },
+                      ]}
+                    >
+                      <Image source={{ uri: item.yield.image }} style={styles.expandedItemImage} />
+                      <View style={styles.expandedItemInfo}>
+                        <Text style={styles.expandedItemTitle}>{item.yield.title}</Text>
+                        <Text style={styles.expandedItemDesc}>{item.yield.description}</Text>
+                      </View>
+                      <View style={styles.quantityControls}>
+                        <Pressable onPress={() => handleQuantity(item.id, -1)}>
+                          <Minus size={20} color={Colors.primary} />
+                        </Pressable>
+                        <Text style={styles.quantityText}>{item.quantity}</Text>
+                        <Pressable onPress={() => handleQuantity(item.id, 1)}>
+                          <Plus size={20} color={Colors.primary} />
+                        </Pressable>
+                      </View>
+                      <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ marginLeft: 8 }}>
+                        <Trash2 size={24} color={Colors.error} />
+                      </TouchableOpacity>
+                    </Animated.View>
+                  )}
+                />
+                <View style={[styles.bottomRow, { justifyContent: 'center' }]}> 
+                  <TouchableOpacity 
+                    style={[styles.goToCartButton, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', minWidth: 180 }]} 
+                    onPress={onGoToCart}
+                  >
+                    <ShoppingBag size={22} color={'#fff'} style={{ marginRight: 8 }} />
+                    <Text style={styles.goToCartText}>
+                      Go to Cart <Text style={{ fontWeight: 'normal' }}>({totalAmount} FCFA)</Text>
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Animated.View>
+          )}
+        </Animated.View>
       </Animated.View>
     </>
   );
@@ -462,5 +543,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     color: Colors.primary,
+  },
+  basketHandleContainer: {
+    position: 'absolute',
+    top: -32,
+    left: 0,
+    right: 0,
+    height: 32,
+    alignItems: 'center',
+    zIndex: 101,
+    width: '100%',
+    justifyContent: 'flex-start',
+  },
+  basketHandle: {
+    width: 80,
+    height: 40,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderWidth: 5,
+    borderColor: '#111', // black border for holo effect
+    backgroundColor: 'transparent',
+    borderBottomWidth: 0,
+    alignSelf: 'center',
   },
 });

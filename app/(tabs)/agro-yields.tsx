@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, TextInput, Text } from 'react-native';
 import { Search, Filter } from 'lucide-react-native';
@@ -7,6 +8,7 @@ import Colors from '@/constants/colors';
 import Basket from '@/components/basket';
 
 export default function AgroYieldsScreen() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredYields, setFilteredYields] = useState(agroYields);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
@@ -32,6 +34,9 @@ export default function AgroYieldsScreen() {
       onClosePopover={() => setOpenPopoverId(null)}
     />
   );
+  const handleGoToCart = () => {
+  router.push('/cart'); // or your actual cart route
+};
 
   return (
     <View style={styles.container}>
@@ -64,7 +69,7 @@ export default function AgroYieldsScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-      <Basket />
+      <Basket onGoToCart={handleGoToCart} />
     </View>
   );
 }

@@ -109,7 +109,8 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       )}
-      <Basket />
+      {/* Only show Basket on AgroYields and Favorites tabs */}
+      {(activeTab === 'AgroYields' || activeTab === 'Favorites') && <Basket />}
     </View>
   );
 }
