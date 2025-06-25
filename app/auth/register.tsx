@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, KeyboardAvoidingView, Platform, ScrollView, Button, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
 import { useAuthStore } from '@/store/authStore';
 import Colors from '@/constants/colors';
+import { register } from '../../components/api/auth';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
@@ -27,17 +28,26 @@ export default function RegisterScreen() {
       return;
     }
     
-    // Mock registration - in a real app, this would call an API
-    login({
-      id: 'u123',
-      name: name,
-      email: email,
-      phone: phone,
-      avatar: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
-      isFarmer: false,
-    });
-    
-    router.replace('/(tabs)');
+    try {
+      const data = await register(name, email, phone, password);
+      console.log('Registration successful:', data);
+      Alert.alert('Success', 'Registration successful!');
+      
+      // Mock registration - in a real app, this would call an API
+      login({
+        id: 'u123',
+        name: name,
+        email: email,
+        phone: phone,
+        avatar: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+        isFarmer: false,
+      });
+      
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      console.log('Registration error:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.message || error.message);
+    }
   };
 
   const handleLogin = () => {
