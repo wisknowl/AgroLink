@@ -27,6 +27,8 @@ export default function RegisterScreen() {
       setError('Passwords do not match');
       return;
     }
+//       const data = await register(name, email, phone, password);
+// process.exit();
     
     try {
       const data = await register(name, email, phone, password);
