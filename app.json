@@ -1,16 +1,15 @@
 {
   "expo": {
-    "name": "AgroLink",
-    "slug": "AgroLink",
+    "name": "AgroBazaar",
+    "slug": "AgroBazaar",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "agrolink",
+    "icon": "./assets/images/AgroBazaar.png",
+    "scheme": "agrobazaar",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
+      "image": "./assets/images/AgroBazaar.png",
       "backgroundColor": "#ffffff"
     },
     "ios": {
@@ -18,11 +17,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/AgroBazaar.png",
         "backgroundColor": "#ffffff"
+        
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.wisknowl.AgroLink"
+      "package": "com.wisknowl.AgroBazaar"
     },
     "web": {
       "bundler": "metro",

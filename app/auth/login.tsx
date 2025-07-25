@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import Colors from '@/constants/colors';
 import { FontAwesome } from '@expo/vector-icons';
 
-const LOGO = require('@/assets/images/icon.png');
+const LOGO = require('@/assets/images/AgroBazaar.png');
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
@@ -30,10 +30,10 @@ export default function LoginScreen() {
     setError('');
     login({
       id: 'u123',
-      name: 'John Doe',
+      name: 'Victory Eyong',
       email: email,
       phone: '+237 6XX XXX XXX',
-      avatar: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60',
+      avatar: 'https://images.unsplash.com/photo-1578758803946-2c4f6738df87?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGJsYWNrJTIwYnVzaW5lc3MlMjBtYW58ZW58MHx8MHx8fDA%3D',
       isFarmer: false,
     });
     setShowLoginModal(false);
@@ -64,13 +64,13 @@ export default function LoginScreen() {
         <View style={styles.logoRow}>
           <Image source={LOGO} style={styles.logo} />
           <Text style={styles.logoText}>
-            <Text style={{ color: '#8D5524' }}>Agro</Text>
-            <Text style={{ color: '#3CB371' }}>Link</Text>
+            <Text style={{ color: '#3CB371' }}>Agro</Text>
+            <Text style={{ color: '#8D5524' }}>Bazaar</Text>
           </Text>
         </View>
         <View style={styles.taglines}>
-          <Text style={styles.taglineMain}>Grow More, Earn Fair.</Text>
-          <Text style={styles.taglineSub}>Wum mingi. Zwa na bôlô</Text>
+          <Text style={styles.taglineMain}>Grow More, Earn More.</Text>
+          {/* <Text style={styles.taglineSub}>Wum mingi. Zwa na bôlô</Text> */}
         </View>
       </View>
       {/* Login button and skip */}
@@ -101,7 +101,8 @@ export default function LoginScreen() {
           style={styles.modalContainer}
         >
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Sign in to your AgroLink account</Text>
+            <Text style={styles.modalTitle}>Sign in to your <Text style={{ color: '#3CB371' }}>Agro</Text>
+            <Text style={{ color: '#8D5524' }}>Bazaar</Text> account</Text>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
             {/* Email Input with Icon */}
             <View style={styles.inputWrapper}>
@@ -180,9 +181,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   logo: {
-    width: 70,
-    height: 70,
-    borderRadius: 16,
+    width: 80,
+    height: 80,
+    borderRadius: 50,
     marginRight: 0,
   },
   logoText: {
